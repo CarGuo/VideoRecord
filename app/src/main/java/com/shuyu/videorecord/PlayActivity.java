@@ -16,8 +16,6 @@ import butterknife.OnClick;
 public class PlayActivity extends AppCompatActivity {
 
     public final static String DATA = "URL";
-    public final static String DATA_W = "width";
-    public final static String DATA_H = "height";
 
     @BindView(R.id.playView)
     PlayView playView;
@@ -37,13 +35,9 @@ public class PlayActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         uri = getIntent().getStringExtra(DATA);
-        int height = getIntent().getIntExtra(DATA_H, 640);
-        int width = getIntent().getIntExtra(DATA_W, 480);
-
-        playView.setSizeH(height);
-        playView.setSizeW(width);
 
         playView.setVideoURI(Uri.parse(uri));
+
         playView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -55,6 +49,13 @@ public class PlayActivity extends AppCompatActivity {
         playView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                //获取视频资源的宽度
+                int videoWidth = mp.getVideoWidth();
+                //获取视频资源的高度
+                int videoHeight = mp.getVideoHeight();
+                playView.setSizeH(videoHeight);
+                playView.setSizeW(videoWidth);
+                playView.requestLayout();
                 duration = mp.getDuration();
                 play();
             }

@@ -191,7 +191,8 @@ public class RecordActivity extends AppCompatActivity implements SurfaceHolder.C
                 videoTime.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
                     @Override
                     public void onChronometerTick(Chronometer chronometer) {
-                        if (chronometer.getText().equals("00:21")) {
+                        //最大录制时长
+                        if (chronometer.getText().equals("00:61")) {
                             if (flagRecord) {
                                 endRecord();
                             }
@@ -215,22 +216,31 @@ public class RecordActivity extends AppCompatActivity implements SurfaceHolder.C
                     if (((rotation >= 0) && (rotation <= 30)) || (rotation >= 330)) {
                         // 竖屏拍摄
                         if (rotationFlag != 0) {
+                            //旋转logo
                             rotationAnimation(rotationFlag, 0);
+                            //这是竖屏视频需要的角度
                             rotationRecord = 90;
+                            //这是记录当前角度的flag
                             rotationFlag = 0;
                         }
                     } else if (((rotation >= 230) && (rotation <= 310))) {
                         // 横屏拍摄
                         if (rotationFlag != 90) {
+                            //旋转logo
                             rotationAnimation(rotationFlag, 90);
+                            //这是正横屏视频需要的角度
                             rotationRecord = 0;
+                            //这是记录当前角度的flag
                             rotationFlag = 90;
                         }
                     } else if (rotation > 30 && rotation < 95) {
                         // 反横屏拍摄
                         if (rotationFlag != 270) {
+                            //旋转logo
                             rotationAnimation(rotationFlag, 270);
+                            //这是反横屏视频需要的角度
                             rotationRecord = 180;
+                            //这是记录当前角度的flag
                             rotationFlag = 270;
                         }
                     }
@@ -316,7 +326,7 @@ public class RecordActivity extends AppCompatActivity implements SurfaceHolder.C
 
     private boolean startRecord() {
 
-        //根据赏光灯和摄像头重新初始化一遍，开始闪光灯工作模式
+        //懒人模式，根据闪光灯和摄像头前后重新初始化一遍，开期闪光灯工作模式
         initCamera(cameraType, true);
 
         if (recorder == null) {
@@ -358,18 +368,21 @@ public class RecordActivity extends AppCompatActivity implements SurfaceHolder.C
                 frontRotation = (rotationRecord == 0) ? 270 - frontOri : frontOri; //录制下来的视屏选择角度，此处为前置
             }
             recorder.setOrientationHint((cameraType == 1) ? frontRotation : rotationRecord);
-
+            //把摄像头的画面给它
             recorder.setPreviewDisplay(surfaceHolder.getSurface());
+            //创建好视频文件用来保存
             videoDir();
             if (videoFile != null) {
+                //设置创建好的输入路径
                 recorder.setOutputFile(videoFile.getPath());
                 recorder.prepare();
                 recorder.start();
-
+                //不能旋转啦
                 orientationEventListener.disable();
                 flagRecord = true;
             }
         } catch (Exception e) {
+            //一般没有录制权限或者录制参数出现问题都走这里
             e.printStackTrace();
             //还是没权限啊
             recorder.reset();
@@ -404,8 +417,6 @@ public class RecordActivity extends AppCompatActivity implements SurfaceHolder.C
         videoTime.setBase(SystemClock.elapsedRealtime());
         Intent intent = new Intent(this, PlayActivity.class);
         intent.putExtra(PlayActivity.DATA, videoFile.getAbsolutePath());
-        intent.putExtra(PlayActivity.DATA_H, (rotationRecord == 90) ? SIZE_1 : SIZE_2);
-        intent.putExtra(PlayActivity.DATA_W, (rotationRecord == 90) ? SIZE_2 : SIZE_1);
         startActivityForResult(intent, 2222);
         overridePendingTransition(R.anim.fab_in, R.anim.fab_out);
     }
@@ -444,6 +455,10 @@ public class RecordActivity extends AppCompatActivity implements SurfaceHolder.C
 
     /**
      * 闪光灯逻辑
+     *
+     * @param p    相机参数
+     * @param type 打开还是关闭
+     * @param isOn 是否启动
      */
     private void FlashLogic(Camera.Parameters p, int type, boolean isOn) {
         flashType = type;
